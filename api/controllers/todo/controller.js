@@ -1,26 +1,32 @@
-const todos = [
-  {
-    id: 1,
-    task: "Do something",
-    completed: false,
-  },
-  {
-    id: 2,
-    task: "Do something else",
-    completed: true,
-  },
-];
+// const todos = [
+//   {
+//     id: 1,
+//     task: "Do something",
+//     completed: false,
+//   },
+//   {
+//     id: 2,
+//     task: "Do something else",
+//     completed: true,
+//   },
+// ];
 
-const getTodos = (req, res) => {
+const Todos = require("../../../models/todo");
+
+const getTodos = async (req, res) => {
+  const todo = await Todos.find({});
   res.status(200).send({
     message: "Fetched successfully",
-    data: todos,
+    data: todo,
   });
 };
 
-const getTodoById = (req, res) => {
+const getTodoById = async (req, res) => {
   const id = req.params.id;
-  const todo = todos.find((elem) => elem.id == id);
+  console.log("id", id);
+  // const todo = todos.find((elem) => elem.id == id);
+  const todo = await Todos.findOne({});
+  console.log("Todos", todo);
   if (!todo) {
     return res.status(404).send({
       message: "todo not found",
@@ -33,42 +39,56 @@ const getTodoById = (req, res) => {
   });
 };
 
-const createTodo = (req, res) => {
-  const newTodo = {
-    id: todos.length + 1,
-    ...req.body,
-  };
-  todos.push(newTodo);
-  res.status(201).send({
-    message: "User created successfully",
-    data: newTodo,
+const createTodo = async (req, res) => {
+  // const newTodo = {
+  //   id: todos.length + 1,
+  //   ...req.body,
+  // };
+  // todos.push(newTodo);
+  const newTodo = new Todos({
+    ...res.body,
   });
+  await newTodo.save(),
+    res.status(201).send({
+      message: "User created successfully",
+      data: newTodo,
+    });
 };
 
-const updateTodo = (req, res) => {
+const updateTodo = async (req, res) => {
   const id = req.params.id;
-  const index = todos.findIndex((elem) => elem.id == id);
-  if (index < 0) {
+  // const index = todos.findIndex((elem) => elem.id == id);
+  // if (index < 0) {
+  //   return res.status(404).send({
+  //     message: "User not found",
+  //     data: {},
+  //   });
+  // }
+  // todos[index] = {
+  //   id: todos[index].id,
+  //   ...req.body,
+  // };
+  const todo = await Todos.findOne({ _id: id });
+  if (!todo) {
     return res.status(404).send({
-      message: "User not found",
+      message: "error not todo",
       data: {},
     });
   }
-  todos[index] = {
-    id: todos[index].id,
-    ...req.body,
-  };
+
+  const updateTodo = await Todos.updateOne({ _id: id }, { ...res.body });
   res.status(200).send({
     message: "User updated successfully",
-    data: todos[index],
+    data: updateTodo,
   });
 };
 
-const patchTodo = (req, res) => {
+const patchTodo = async (req, res) => {
   const action = req.query.action;
   const id = req.params.id;
-  const index = todos.findIndex((elem) => elem.id == id);
-  if (index < 0) {
+  // const index = todos.findIndex((elem) => elem.id == id);
+  const todo = await Todos.findOne({ _id: id });
+  if (!todo) {
     return res.status(404).send({
       message: "User not found",
       data: {},
@@ -76,36 +96,38 @@ const patchTodo = (req, res) => {
   }
   switch (action) {
     case "done":
-      todos[index] = {
-        ...todos[index],
-        completed: true,
-      };
+      await Todos.updateOne({ _id: id }, { completed: true });
       break;
     case "undone":
-      todos[index] = {
-        ...todos[index],
-        completed: false,
-      };
+      await Todos.updateOne({ _id: id }, { completed: false });
       break;
     default:
       break;
   }
   res.status(200).send({
     message: "Todo patched successfully",
-    data: todos[index],
+    data: {},
   });
 };
 
-const deleteTodo = (req, res) => {
+const deleteTodo = async (req, res) => {
   const id = req.params.id;
-  const index = todos.findIndex((elem) => elem.id == id);
-  if (index < 0) {
+  // const index = todos.findIndex((elem) => elem.id == id);
+  // if (index < 0) {
+  //   return res.status(404).send({
+  //     message: "User not found",
+  //     data: {},
+  //   });
+  // }
+  // todos.splice(index, 1);
+  const todo = await Todos.findOne({ _id: id });
+  if (!todo) {
     return res.status(404).send({
-      message: "User not found",
+      message: "error not todo",
       data: {},
     });
   }
-  todos.splice(index, 1);
+  const deletedTodo = await Todos.deleteOne({ _id: id });
   res.status(200).send({
     message: "User deleted successfully",
     data: {},

@@ -3,6 +3,16 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const todoRouter = require("./api/controllers/todo/router");
 const userRouter = require("./api/controllers/user/router");
+const mongoose = require("mongoose");
+
+mongoose.connect("mongodb://localhost:27017/testBase", {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+});
+
+const db = mongoose.connection;
+
+db.once("open", () => console.log("DataBase connected !!"));
 
 const app = express();
 
