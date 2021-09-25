@@ -46,7 +46,7 @@ const createTodo = async (req, res) => {
   // };
   // todos.push(newTodo);
   const newTodo = new Todos({
-    ...res.body,
+    ...req.body,
   });
   await newTodo.save(),
     res.status(201).send({
